@@ -1,6 +1,8 @@
 import asyncio
 from ossapi import Ossapi, Scope, UserLookupKey, GameMode, RankingType, OssapiAsync, Score
 
+#testing making sure im on the right repo
+
 client_id = 22219
 client_secret = "socY7zpCMAXyCGi9TFP3In8mt0gPBD5N7Nc96LIl"
 oss = Ossapi(client_id, client_secret)

@@ -15,7 +15,7 @@ scrobbled_scores = []
 
 async def get_scores():
     new_scores = await oss.user_scores(user.id, include_fails=True, type="recent")
-    for s in new_scores:
+    for s in new_scores: #change this to check timestamp of recent scores, store "last scrobbled" based on unix time
         if s not in scrobbled_scores:
             scrobble(s)
 
@@ -27,7 +27,7 @@ def scrobble(score):
 
 async def main():
     asyncio.run(get_scores())
-    await asyncio.wait(5)
+    await asyncio.wait(5) # replace for window check
     main()
 
 # whatever code is needed to store current scores, pretend this works for now
@@ -37,3 +37,8 @@ asyncio.run(main())
 # time+date: created_at (datetime format)
 # artist: score.beatmapset.artist_unicode
 # song: score.beatmapset.title_unicode
+
+# methodology for score check
+# use scrobble(), also grab beatmap object -> count_circles, count_spinners, count_sliders
+# also add statistics -> add all values within such
+# if > 50%, scrobble
