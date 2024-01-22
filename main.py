@@ -28,6 +28,9 @@ async def get_scores():
         stats = {}
         stats["last_scrobbled"] = int(time.time())
         if not os.path.exists("last_read.json"):
+        stats = {}
+        stats["last_scrobbled"] = int(time.time())
+        if not os.path.exists("last_read.json"):
             scrobble(s)
         else:
             with open('last_read.json', 'r') as file:
