@@ -8,13 +8,15 @@ import time
 import json
 
 USER_AGENT = "luc"
-SECRET = None
+API_SECRET = None
 API_KEY = None
 SESSION_KEY = None
 
 def method_sig(par):
     keys_org = sorted(par)
     sig = ""
+    print("test api_secret start:"+API_SECRET)
+    print("test api_key start:"+API_KEY)
     for key in keys_org:
         if key != 'format':
             if isinstance(par[key], list):
@@ -22,7 +24,7 @@ def method_sig(par):
                     sig = sig + key + str(var)
             else:
                 sig = sig + key + par[key]
-    sig = sig + SECRET
+    sig = sig + API_SECRET
     sig_md5 = hashlib.md5(sig.encode('utf-8')).hexdigest()
     return sig_md5
 
@@ -48,8 +50,11 @@ def api_post(load):
     return requests.post(url, headers = head, params=load)
 
 def start_connection(key, secret):
-    SECRET = secret
+    API_SECRET = secret
     API_KEY = key
+
+    print("test api_secret start:"+API_SECRET)
+    print("test api_key start:"+API_KEY)
     token_apiresp = api_get({
         'method': "auth.getToken"
     }, True).json()
@@ -75,14 +80,14 @@ def start_connection(key, secret):
     return session_key
 
 def scrobble(track, artist, timestamp):
-    api_post({
+    response = api_post({
         'sk': SESSION_KEY,
         'method': "track.scrobble",
         'artist': [artist],
         'track': [track],
         'timestamp': [timestamp]
     })
-
+    print("Response from scrobble \"" + artist + " - " + track + "\": " + response.text)
 
 # scrobble
 # print(json.dumps(api_post({ 
