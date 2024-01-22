@@ -20,7 +20,6 @@ oss = Ossapi(client_id, client_secret)
 last_scrobbled = 0
 
 import datetime
-test_counter = 0
 
 async def get_scores():
     new_scores = oss.user_scores(user.id, include_fails=True, type="recent")
@@ -51,8 +50,7 @@ def scrobble(score):
 async def main():
     score_collect = asyncio.create_task(get_scores())
     await score_collect
-    print("test iteration " + str(test_counter) + " operated at " + str(datetime.datetime.now()))
-    test_counter+=1
+    print("test iteration operated at " + str(datetime.datetime.now()))
     await asyncio.sleep(30) # optimal method is to either check for window name updates or using the msn live signal but i am too stupid, we use a sleep method                           
 
 async def main_loop():
