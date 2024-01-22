@@ -8,17 +8,15 @@ import time
 import json
 
 class lastfm:
-    def __init__(self):
+    def __init__(self, key, secret):
         self.USER_AGENT = "luc"
-        self.API_SECRET = None
-        self.API_KEY = None
-        self.SESSION_KEY = None
+        self.API_SECRET = secret
+        self.API_KEY = key
+        self.SESSION_KEY = ""
 
     def method_sig(self, par):
         keys_org = sorted(par)
         sig = ""
-        print("test api_secret start:"+ self.API_SECRET)
-        print("test api_key start:"+ self.API_KEY)
         for key in keys_org:
             if key != 'format':
                 if isinstance(par[key], list):
@@ -51,35 +49,28 @@ class lastfm:
 
         return requests.post(url, headers = head, params=load)
 
-    def start_connection(self, key, secret):
-        API_SECRET = secret
-        API_KEY = key
-
-        print("test api_secret start:"+API_SECRET)
-        print("test api_key start:"+API_KEY)
+    def start_connection(self):
         token_apiresp = self.api_get({
             'method': "auth.getToken"
         }, True).json()
         token = token_apiresp['token']
 
         # get session key
-        session_key = ""
         if not os.path.exists("session.txt"):
-            webbrowser.open("http://www.last.fm/api/auth/?api_key={api}&token={token}".format(api = API_KEY, token = token), 2)
+            webbrowser.open("http://www.last.fm/api/auth/?api_key={api}&token={token}".format(api = self.API_KEY, token = token), 2)
             session_save = open("session.txt", "w")
             delay = input("Hit ENTER to continue.") #only used to delay the browser so we don't need the callback
-            session_key = self.api_get({ 
+            self.SESSION_KEY = self.api_get({ 
                 'method': "auth.getSession",
                 'token': token
             }, True).json()['session']['key']
-            print(session_key)
-            session_save.write(session_key)
+            session_save.write(self.SESSION_KEY)
             session_save.close()
         else:
             session_save = open("session.txt", "r")
-            session_key = session_save.read()
+            self.SESSION_KEY = session_save.read()
 
-        return session_key
+        return self.SESSION_KEY
 
     def scrobble(self, track, artist, timestamp):
         response = self.api_post({
@@ -89,7 +80,8 @@ class lastfm:
             'track': [track],
             'timestamp': [timestamp]
         })
-        print("Response from scrobble \"" + artist + " - " + track + "\": " + response.text)
+        with open("responses.txt", 'w') as file:
+            file.write("Response from scrobble \"" + artist + " - " + track + "\": " + response.text)
 
 # scrobble
 # print(json.dumps(api_post({ 

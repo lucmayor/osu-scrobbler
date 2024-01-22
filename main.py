@@ -19,41 +19,52 @@ with open('secret.json', 'r') as secret:
 oss = Ossapi(client_id, client_secret)
 last_scrobbled = 0
 
+import datetime
+test_counter = 0
+
 async def get_scores():
-    new_scores = await oss.user_scores(user.id, include_fails=True, type="recent")
+    new_scores = oss.user_scores(user.id, include_fails=True, type="recent")
     for s in new_scores: # change this to check timestamp of recent scores, store "last scrobbled" based on unix time
         stats = {}
         stats["last_scrobbled"] = int(time.time())
         if not os.path.exists("last_read.json"):
             scrobble(s)
         else:
-            with json.loads(open('last_read.json', 'r').read()) as file:
-                if s.created_at.timestamp() > file.last_scrobbled:
+            with open('last_read.json', 'r') as file:
+                f = json.loads(file.read())
+                if s.created_at.timestamp() > f["last_scrobbled"]:
                     scrobble(s)
-        with open("last_read.json", 'w') as f:
-            json.dump(stats, f)
+    with open("last_read.json", 'w') as f:
+        json.dump(stats, f)
 
 def scrobble(score):
     decon_score = [score.beatmapset.artist_unicode, score.beatmapset.title_unicode, score.created_at]
-    score_hits = int(score.count_50) + int(score.count_100) + int(score.count_300) + (score.count_miss)
-    with score.beatmap as map:
-        total_hits = map.count_circles + map.count_sliders + map.count_spinners
-        if (score_hits / total_hits) > .5:
-            lfm.scrobble(decon_score[1], decon_score[0], decon_score[2].timestamp())
-        else:
-            print("did not scrobble \"" + decon_score[0] + " - " + decon_score[1] + "\" at " + decon_score[2] + ": did not hit 50% of hits")
+    score_hits = int(score.statistics.count_50) + int(score.statistics.count_100) + int(score.statistics.count_300) + (score.statistics.count_miss)
+    map = score.beatmap
+    total_hits = map.count_circles + map.count_sliders + map.count_spinners
+    if (score_hits / total_hits) > .5:
+        print("scrobbled " + decon_score[1] + " " + decon_score[0] + " at " + str(decon_score[2]))
+        client.scrobble(track=decon_score[1], artist=decon_score[0], timestamp=decon_score[2].timestamp())
+    else:
+        print("did not scrobble \"" + decon_score[0] + " - " + decon_score[1] + "\" at " + str(decon_score[2]) + ": did not hit 50% of hits")
 
 async def main():
-    get_scores = asyncio.create_task(get_scores())
-    await get_scores
+    score_collect = asyncio.create_task(get_scores())
+    await score_collect
+    print("test iteration " + str(test_counter) + " operated at " + str(datetime.datetime.now()))
+    test_counter+=1
     await asyncio.sleep(30) # optimal method is to either check for window name updates or using the msn live signal but i am too stupid, we use a sleep method                           
-    main()
 
-client = lfm()
-lastfm_session = client.start_connection(lastfm_key, lastfm_secret)
+async def main_loop():
+    while True:
+        await main()
+
+client = lfm(lastfm_key, lastfm_secret)
+lastfm_session = client.start_connection()
 user_player = input("Please input a username to track: ")
 user = oss.user(user_player, key=UserLookupKey.USERNAME)
-asyncio.run(main())
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main_loop())
 
 # needed: time, date, artist unicode, song unicode
 # time+date: created_at (datetime format)
