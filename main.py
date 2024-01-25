@@ -24,6 +24,12 @@ import datetime
 async def get_scores():
     new_scores = oss.user_scores(user.id, include_fails=True, type="recent")
     stats = {'last_scrobbled':0};
+    if len(new_scores) == 0:
+        log_file = open("log.txt", "a")
+        print("Run error: See log file for errors. Continuing program...")
+        log_file.write("ERROR (" + datetime.datetime.now() + "): User \"" + user_player + "\" has no plays listed.\n")
+        log_file.close()
+        return
     for s in new_scores:
         stats["last_scrobbled"] = int(time.time())
         if not os.path.exists("last_read.json"):

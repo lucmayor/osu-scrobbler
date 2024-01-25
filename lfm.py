@@ -87,8 +87,9 @@ class lastfm:
             'track': [track],
             'timestamp': [timestamp]
         })
-        with open("responses.txt", 'w') as file:
-            file.write("Response from scrobble \"" + artist + " - " + track + "\": " + response.text)
+        # this errors on japanese artists rn
+        # with open("responses.txt", 'w') as file:
+        #     file.write("Response from scrobble \"" + artist + " - " + track + "\": " + response.text)
 
 # scrobble
 # print(json.dumps(api_post({ 
