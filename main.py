@@ -23,8 +23,8 @@ import datetime
 
 async def get_scores():
     new_scores = oss.user_scores(user.id, include_fails=True, type="recent")
+    stats = {'last_scrobbled':0};
     for s in new_scores: # change this to check timestamp of recent scores, store "last scrobbled" based on unix time
-        stats = {}
         stats["last_scrobbled"] = int(time.time())
         if not os.path.exists("last_read.json"):
             scrobble(s)
