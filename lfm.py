@@ -56,19 +56,26 @@ class lastfm:
         token = token_apiresp['token']
 
         # get session key
-        if not os.path.exists("session.txt"):
+        session_arr = {}
+        if os.path.exists("session.json"):
+            session_arr = json.loads(open("session.json", 'r').read())
+        else:
+            session_arr['key'] = ""
+            session_arr['last_auth'] = 0
+        if time.time() - 43200 > session_arr['last_auth']:
             webbrowser.open("http://www.last.fm/api/auth/?api_key={api}&token={token}".format(api = self.API_KEY, token = token), 2)
-            session_save = open("session.txt", "w")
+            session_save = open("session.json", "w")
             delay = input("Hit ENTER to continue.") #only used to delay the browser so we don't need the callback
             self.SESSION_KEY = self.api_get({ 
                 'method': "auth.getSession",
                 'token': token
             }, True).json()['session']['key']
-            session_save.write(self.SESSION_KEY)
+            session_arr['last_auth'] = time.time()
+            session_arr['key'] = self.SESSION_KEY
+            json.dump(session_arr, session_save)
             session_save.close()
         else:
-            session_save = open("session.txt", "r")
-            self.SESSION_KEY = session_save.read()
+            self.SESSION_KEY = session_arr['key']
 
         return self.SESSION_KEY
 
