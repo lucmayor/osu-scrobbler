@@ -88,7 +88,7 @@ class lastfm:
             'timestamp': [timestamp]
         })
         # *should* fix on japanese artists
-        with open("responses.txt", 'w', encoding="utf-8") as file:
+        with open("responses.txt", 'a', encoding="utf-8") as file:
             file.write("Response from scrobble \"" + artist + " - " + track + "\": " + response.text)
 
 # scrobble
