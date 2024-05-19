@@ -8,7 +8,6 @@ A lightweight program to intake osu! player status and submit the plays to last.
 - Non-Standard Python Dependencies:
   - [ossapi!](https://github.com/tybug/ossapi) - An osu!api adaptive framework for Python
 - osu! & last.fm API key and secret
-  - framework for key storage coming soon
 
 ## Usage
 
